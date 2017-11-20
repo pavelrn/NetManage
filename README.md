@@ -78,3 +78,13 @@ The following playbook will configure a set of management protocols. Please note
 ansible-playbook -i inventory.sample deploy-management.yml --tags="snmp,syslog,ntp,ssh"
 ```
 
+You can use the playbook with clean=1 parameter to run kind of old-config cleaning action before deploying desired config.
+
+```
+ansible-playbook -i inventory.sample deploy-management.yml --tags="snmp,syslog,ntp,ssh" -e "clean=1"
+```
+
+
+### TO DO
+
+Undeploy playbook might be needed to remove per-protocol configuration. However you might define new configuration data and re-run deploy playbook with clean=1 flag to get old configuration deleted (re-written). 
