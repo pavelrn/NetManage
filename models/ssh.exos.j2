@@ -1,0 +1,7 @@
+{% for s in ssh %}
+create account admin {{ s.user }} {{ s.clear_pass }}
+{% endfor %}
+
+disable account user
+
+save configuration

@@ -1,0 +1,11 @@
+---
+    
+  - name: Add monitor user
+    user:
+      name: "{{ item.user }}"
+      password: "{{ item.enc_pass }}"
+      groups: sudo,netshow,netedit
+      shell: /bin/bash
+    become: yes  
+    with_items: "{{ ssh }}"
+    tags: [ 'ssh' ]

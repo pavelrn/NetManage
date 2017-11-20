@@ -1,0 +1,13 @@
+{% if 'mgmt' in vrf %}
+{% for s in syslog_servers %}
+action(type="omfwd" Target="{{ s }}" Device="mgmt" Port="514" Protocol="udp")
+{% endfor %}
+{% endif %}
+{% if 'default' in vrf %}
+{% for s in syslog_servers %}
+add syslog host ipv4 {{ s }} port udp 514
+{% endfor %}
+{% endif %}
+
+
+   

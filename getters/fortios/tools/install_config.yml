@@ -1,0 +1,44 @@
+---
+
+  # Code below will call napalm to install config.
+  # Variable cfg_name is set in the role according to the role.
+  # 
+  - set_fact:
+      model_file: "models/{{ cfg_name }}.j2"
+      config_file: "{{ config_dir }}/{{ inventory_hostname }}-{{ cfg_name }}.conf" 
+      diff_file: "{{ config_dir }}/{{ inventory_hostname }}-{{ cfg_name }}.diff"  
+    tags: [ 'always' ]
+
+  - template: src={{ model_file }} dest={{ config_file }}
+    delegate_to: localhost
+    changed_when: no
+    tags: [ 'always' ]
+
+  - name: Install * {{ cfg_name }} * config and save diff
+    delegate_to: localhost
+    napalm_install_config:
+      hostname={{ inventory_hostname }}
+      username={{ ansible_ssh_user }}
+      dev_os=fortios
+      password={{ ansible_ssh_pass }}
+      config_file={{ config_file }}
+      commit_changes={{ commit_changes }}
+      get_diffs=True
+      diff_file={{ diff_file }}
+      optional_args="fortios_vdom={{ fortios_vdom }}"
+    when: fortios_vdom is defined
+    tags: [ 'always' ]
+
+  - name: Install * {{ cfg_name }} * config and save diff
+    delegate_to: localhost
+    napalm_install_config:
+      hostname={{ inventory_hostname }}
+      username={{ ansible_ssh_user}}
+      dev_os=fortios
+      password={{ ansible_ssh_pass }}
+      config_file={{ config_file }}
+      commit_changes={{ commit_changes }}
+      get_diffs=True
+      diff_file={{ diff_file }}
+    when: fortios_vdom is undefined
+    tags: [ 'always' ]

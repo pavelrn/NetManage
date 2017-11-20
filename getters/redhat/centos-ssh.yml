@@ -1,0 +1,30 @@
+---
+
+  - name: Make sure we have a 'wheel' group
+    group:
+      name: wheel
+      state: present
+    become: yes  
+    tags: [ 'ssh' ]
+
+  - name: Allow 'wheel' group to have passwordless sudo
+    lineinfile:
+      dest: /etc/sudoers
+      state: present
+      regexp: '^%wheel'
+      line: '%wheel ALL=(ALL) NOPASSWD: ALL'
+      validate: visudo -cf %s
+    become: yes  
+    tags: [ 'ssh' ]
+
+  - name: Add monitor user
+    user:
+      name: "{{ s.user }}"
+      password: "{{ s.enc_pass }}"
+      groups: "wheel"
+      shell: /bin/bash
+    with_items: "{{ ssh }}"
+    loop_control:
+      loop_var: s
+    become: yes  
+    tags: [ 'ssh' ]

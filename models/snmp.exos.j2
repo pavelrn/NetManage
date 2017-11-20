@@ -1,0 +1,33 @@
+#configure snmp sysLocation "{{ snmp.location }}"
+
+
+# PLEASE COMMENT THIS OUT IF NECCESSARY
+conf snmpv3 delete user all-non-defaults
+configure snmpv3 delete target-addr all
+configure snmpv3 delete target-params
+
+configure snmp sysContact "{{ snmp.contact }}"
+
+enab snmp access snmpv3
+
+{% if 'mgmt' in vrf|lower %}
+enable snmp access vr vr-Mgmt
+disable snmp access vr vr-Default
+{% endif %}
+
+{% if 'default' in vrf|lower %}
+disable snmp access vr vr-Mgmt
+enable snmp access vr vr-Default
+{% endif %}
+
+disable snmp access snmp-v1v2c
+disable snmpv3 default-user
+
+{% for s in snmp.v3 %}
+conf snmpv3 add user monitor authentication sha {{ s.auth }} privacy aes {{ s.enc }}
+configure snmpv3 add group admin user {{ s.user }} sec-model usm 
+{% endfor %}
+
+
+
+save configuration

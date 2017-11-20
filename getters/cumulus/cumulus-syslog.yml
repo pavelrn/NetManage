@@ -1,0 +1,39 @@
+  - set_fact:
+      model_file: "models/syslog.cumulus.j2"
+      config_file: "{{ config_dir }}/{{ inventory_hostname }}-syslog.cumulus.conf"
+    tags: [ 'syslog' ]  
+      
+  - template: src={{ model_file }} dest={{ config_file }}
+    delegate_to: localhost
+    tags: [ 'syslog' ]
+
+    # mgmt vrf
+  - name: "Configuring syslog (mgmt vrf)"
+    blockinfile:
+      path: /etc/rsyslog.d/99-syslog.conf
+      marker: "# {mark} ANSIBLE MANAGED BLOCK "
+      content: "{{ item }}"
+    become: yes
+    with_file:
+      - "{{ config_file }}"
+    when: "'mgmt' in vrf and commit_changes"
+    tags: [ 'syslog' ]
+    
+    # default vrf
+  - name: "Configuring syslog (default vrf)"
+    nclu:
+      template: "{{ item }}"
+      commit: "{{ commit_changes }}"
+    with_file:
+      - "{{ config_file }}"
+    when: "'default' in vrf and commit_changes"
+    tags: [ 'ntp' ]
+
+    
+  - name: "Restart syslog"
+    command: "{{ item }}" 
+    become: true
+    with_items:
+      - systemctl restart rsyslog.service
+    tags: [ 'syslog' ]
+    when: "commit_changes"

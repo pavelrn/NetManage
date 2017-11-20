@@ -1,0 +1,47 @@
+---
+
+- hosts: all
+
+  # we control facts gathering
+  gather_facts: no
+  
+  vars:
+    config_dir: configs
+    ansible_os_family: undefined
+    commit_changes: "{{ commit|default(false) }}" 
+  tasks:
+
+  - name: Create configuration directory
+    local_action: file path={{ config_dir }} state=directory
+    run_once: true
+    check_mode: false
+    changed_when: false
+    tags: [ 'always' ]
+
+  - name: Gather facts (Linux-enabled systems)
+    setup:
+    # fo not gather facts if ansible_os is defined
+    when: 'ansible_os is undefined'
+    tags: [ 'always' ]
+    
+  - debug: 
+      msg: "Device type auto-detected as: {{ ansible_os_family }}"
+
+  - set_fact:
+      ansible_os: cumulus
+    when:  "'Cumulus' in ansible_os_family"
+    tags: [ 'always' ]
+    
+  - set_fact:
+      ansible_os: redhat
+    when:  "'RedHat' in ansible_os_family"
+    tags: [ 'always' ]
+
+  - include: "{{ i }}"
+    vars:
+      filter_dir: getters/{{ ansible_os }}
+    with_fileglob: [ "getters/{{ ansible_os }}/*.yml" ]
+    loop_control:
+      loop_var: i
+
+ 

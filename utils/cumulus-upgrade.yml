@@ -1,0 +1,18 @@
+---
+
+- hosts: all
+  gather_facts: no
+  
+  tasks:
+  
+  - debug: 
+      msg: "{{ hostvars[inventory_hostname] }}"
+      verbosity: 1
+  
+  - name: Update all packages to the latest version
+    apt:
+      upgrade: dist
+      force: yes
+      update_cache: yes
+      autoremove: yes
+    become: yes

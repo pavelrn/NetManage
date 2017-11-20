@@ -1,0 +1,5 @@
+add time zone Europe/Minsk
+
+{% for s in ntp_servers %}
+add  time ntp server {{ s }}
+{% endfor %}

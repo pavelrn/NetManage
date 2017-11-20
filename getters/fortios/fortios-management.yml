@@ -1,0 +1,36 @@
+
+---
+
+  - find:
+      paths: "{{ config_dir }}/"
+      patterns: "{{ inventory_hostname }}*"
+    register: find_results
+    delegate_to: localhost
+    changed_when: no
+    tags: [ 'always' ]
+  
+  - name: remove existing previous candidate config directories
+    file:
+      path: "{{ item['path'] }}"
+      state: absent
+    with_items: "{{ find_results['files'] }}"
+    delegate_to: localhost
+    changed_when: no
+    tags: [ 'always' ]
+
+  - include: tools/install_config.yml
+    vars:
+      cfg_name: "snmp.fortios"
+    tags: [ 'snmp' ]
+    
+  - include: tools/install_config.yml
+    vars:
+      cfg_name: "syslog.fortios"
+    tags: [ 'syslog' ]
+    
+  - include: tools/install_config.yml
+    vars:
+      cfg_name: "ssh.fortios"
+    tags: [ 'ssh' ]
+
+   

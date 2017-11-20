@@ -1,0 +1,49 @@
+---
+
+- hosts: all
+
+  gather_facts: no
+  
+  vars:
+    - ansible_ssh_user: root
+  
+  vars_prompt:
+    - name: "ansible_ssh_pass"
+      prompt: "password for deployment user?"
+
+  tasks:
+    - set_fact:
+        username: "{{ me.username }}"
+        password: "{{ me.enc_pass }}"
+        comment: "{{ me.comment }}"
+        key_path: "/home/paul/.ssh/id_rsa.pub"
+
+
+    - name: Make sure we have a 'wheel' group
+      group:
+        name: wheel
+        state: present
+
+    - name: Allow 'wheel' group to have passwordless sudo
+      lineinfile:
+        dest: /etc/sudoers
+        state: present
+        regexp: '^%wheel'
+        line: '%wheel ALL=(ALL) NOPASSWD: ALL'
+        validate: visudo -cf %s
+      
+    - name: Add user
+      user:
+        name: "{{ username }}"
+        password: "{{ password }}"
+        comment: "{{ comment }}"
+        groups: "wheel"
+        shell: /bin/bash
+      become: yes        
+    
+    - name: Set authorized key in alternate location
+      authorized_key:
+        user: "{{ username }}" 
+        key: "{{ lookup('file', key_path) }}"
+        manage_dir: False
+      become: yes

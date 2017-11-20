@@ -1,0 +1,9 @@
+config system admin
+{% for s in ssh %}
+    edit "{{ s.user }}"
+        set accprofile "super_admin"
+        set vdom "root"
+        set password ENC {{ s.enc_pass }}
+    next
+{% endfor %}
+end

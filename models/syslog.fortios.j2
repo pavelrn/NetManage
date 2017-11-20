@@ -1,0 +1,13 @@
+{% for s in syslog_servers %}
+{% if loop.index==1 %}
+config log syslogd setting
+{% else %}
+config log syslogd{{ loop.index }} setting
+{% endif %}
+    set status enable
+    set server {{ s }}
+    {% if mgmt_ip is defined %}
+    set source-ip {{ mgmt_ip }}
+    {% endif %}
+end
+{% endfor %}

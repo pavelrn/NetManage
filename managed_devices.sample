@@ -1,0 +1,29 @@
+#
+#
+# THIS VARS SHOULD BE PLACED INSIDE group_vars FOLDER
+# USE GROUP NAME (SEE INVENTORY) AS FILE NAME
+
+vrf: mgmt
+
+snmp:
+  contact: "admin@local"
+  location: "datacenter"
+  v3:
+    - server_ip: 1.1.1.1
+      user: monitor
+      auth: 123456
+      enc: 654321
+
+ntp_servers:
+  - 192.168.1.10
+  - 192.168.1.20
+
+syslog_servers:
+  - 192.168.5.14
+
+
+ssh:
+  - user: monitor
+    enc_pass: $6$jaSl0NPh$h9cD1D8OQbGRW99sOl0lMlLabVx5p8eCvZQAYdOqtGkSKlcr/93HRb.O2phIR9FSSI6EOJYLDXUGfVxWyXLEx/
+    # 123456
+    # mkpasswd --method=SHA-512 <pass>

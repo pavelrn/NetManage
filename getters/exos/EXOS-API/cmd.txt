@@ -1,0 +1,5 @@
+configure vlan "default" add port 15 tagged
+configure vlan "lab" add port 15 untagged
+configure vlan "default" add port 16 tagged
+configure vlan "lab" add port 16 untagged
+

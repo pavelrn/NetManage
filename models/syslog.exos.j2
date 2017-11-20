@@ -1,0 +1,19 @@
+{% for s in syslog_servers %}
+
+{% if 'default' in vrf|lower %}
+conf syslog add {{ s }} vr VR-Default local0
+{% endif %}
+
+{% if 'mgmt' in vrf|lower %}
+conf syslog add {{ s }} vr VR-Mgmt local0
+{% endif %}
+
+# configure log target syslog {{ s }} format timestamp hundredths date mm/dd/yyyy event-name component severity
+enable log target syslog {{ s }}
+{% endfor %}
+
+enable syslog
+
+enable cli-config-logging
+
+save configuration

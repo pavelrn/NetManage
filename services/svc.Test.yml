@@ -1,0 +1,23 @@
+---
+
+vlans:
+  - name: default
+    id: 1
+  - name: lab
+    id: 4
+
+name: Test
+ports:
+    - switch: l2.slx
+      port_id: 15
+      port_name: 15_Test
+      vlans:
+        - { name: default, tag: True }
+        - { name: lab }    
+
+    - switch: l2.slx
+      port_id: 16
+      port_name: 16_Test
+      vlans:
+        - { name: default, tag: True }
+        - { name: lab }   

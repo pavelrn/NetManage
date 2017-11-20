@@ -1,0 +1,11 @@
+{% if ansible_eth0 is defined %}
+add snmp-server listening-address {{ ansible_eth0.ipv4.address }}
+{% endif %}
+
+{% for s in snmp.v3 %}
+add snmp-server trap-destination {{ s.server_ip }} community-password {{ s.enc }} version 2c
+add snmp-server username {{ s.user }} auth-sha {{ s.auth }} encrypt-aes {{ s.enc }}
+{% endfor %}
+
+add snmp-server system-contact {{ snmp.contact }}
+add snmp-server system-location {{ snmp.location }}

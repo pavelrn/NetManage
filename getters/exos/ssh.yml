@@ -1,0 +1,17 @@
+---
+
+  # modeling
+  - set_fact:
+      model_file: "models/ssh.exos.j2"
+      config_file: "{{ config_dir }}/{{ inventory_hostname }}-ssh.exos.conf"
+    tags: [ 'ssh' ]
+      
+  - template: src={{ model_file }} dest={{ config_file }}
+    delegate_to: localhost
+    tags: [ 'ssh' ]
+
+  - name: Install EXOS configuration
+    delegate_to: localhost
+    command: perl {{inventory_dir }}/EXOS-API/execCliFile.pl \
+      {{ inventory_hostname }} {{ ansible_ssh_user }} {{ ansible_ssh_pass }} {{ config_file }}
+    tags: [ 'ssh' ]

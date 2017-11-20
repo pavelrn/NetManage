@@ -1,0 +1,28 @@
+---
+
+  - set_fact:
+      model_file: "models/syslog.redhat.j2"
+      config_file: "{{ config_dir }}/{{ inventory_hostname }}-syslog.redhat.conf"
+    tags: [ 'syslog' ] 
+
+  - template: src={{ model_file }} dest={{ config_file }}
+    delegate_to: localhost
+    tags: [ 'syslog' ]
+
+  - name: "Configuring syslog"
+    blockinfile:
+      path: /etc/rsyslog.conf
+      marker: "# {mark} ANSIBLE MANAGED BLOCK "
+      content: "{{ item }}"
+    become: yes
+    with_file:
+      - "{{ config_file }}"
+    tags: [ 'syslog' ]
+
+  - name: start rsyslog service on centos
+    systemd:
+      state: restarted
+      name: rsyslog
+      enabled: yes
+    become: yes
+    tags: [ 'syslog' ]

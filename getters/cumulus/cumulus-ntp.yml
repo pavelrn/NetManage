@@ -1,0 +1,40 @@
+    # NTP
+  - name: "Configuring NTP"
+    set_fact:
+      model_file: "models/ntp.cumulus.j2"
+      config_file: "{{ config_dir }}/{{ inventory_hostname }}-ntp.cumulus.conf"
+    tags: [ 'ntp' ]
+      
+  - template: src={{ model_file }} dest={{ config_file }}
+    delegate_to: localhost
+    tags: [ 'ntp' ]
+  
+  - nclu:
+      template: "{{ item }}"
+      commit: "{{ commit_changes }}"
+    with_file:
+      - "{{ config_file }}"
+    tags: [ 'ntp' ]
+
+
+  # NTP - mgmt vrf
+  - name: "Configuring ntp@mgmt"
+    command: "{{ item }}" 
+    become: true
+    with_items:
+      - systemctl stop ntp.service
+      - systemctl disable ntp.service
+      - systemctl start ntp@mgmt 
+      - systemctl enable ntp@mgmt  
+    when: "'mgmt' in vrf and commit_changes"
+    tags: [ 'ntp' ]
+    
+    # if default vrf
+  - name: start ntp service
+    systemd:
+      state: restarted
+      name: ntp
+      enabled: yes
+    become: yes
+    when: "'default' in vrf and commit_changes"
+    tags: [ 'ntp' ]

@@ -1,0 +1,16 @@
+config system snmp sysinfo
+    set status enable
+    set description {{ inventory_hostname }} 
+    set contact-info "{{ snmp.contact }}"
+    set location "{{ snmp.location }}"
+end
+config system snmp user
+{% for s in snmp.v3 %}
+    edit "{{ s.user}}"
+        set notify-hosts "{{ s.server_ip }}"
+        set security-level auth-priv
+        set auth-pwd {{ s.auth }}
+        set priv-pwd {{ s.enc }}
+    next
+{% endfor %}
+end

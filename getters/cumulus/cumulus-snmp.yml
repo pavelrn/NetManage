@@ -1,0 +1,47 @@
+---
+
+  # modeling
+  - set_fact:
+      model_file: "models/snmp.cumulus.j2"
+      config_file: "{{ config_dir }}/{{ inventory_hostname }}-snmp.cumulus.conf"
+    tags: [ 'snmp' ]
+      
+  - template: src={{ model_file }} dest={{ config_file }}
+    delegate_to: localhost
+    tags: [ 'snmp' ]
+      
+  - nclu:
+      commands:
+        - del snmp-server all
+    when: clean is defined
+    tags: [ 'snmp' ]
+  
+  - nclu:
+      template: "{{ item }}"
+      commit: "{{ commit_changes }}"
+    with_file:
+      - "{{ config_file }}"
+    tags: [ 'snmp' ]
+      
+    # if mgmt vrf
+  - name: "Configuring snmpd@mgmt"
+    command: "{{ item }}" 
+    become: true
+    with_items:
+      - systemctl stop snmpd.service
+      - systemctl disable snmpd.service
+      - systemctl stop snmpd@mgmt  
+      - systemctl start snmpd@mgmt 
+      - systemctl enable snmpd@mgmt  
+    when: "'mgmt' in vrf and commit_changes"
+    tags: [ 'snmp' ]
+    
+    # if default vrf
+  - name: start snmpd service
+    systemd:
+      state: restarted
+      name: snmpd
+      enabled: yes
+    become: yes
+    when: "'default' in vrf and commit_changes"
+    tags: [ 'snmp' ]

@@ -1,0 +1,4 @@
+[managed_devices]
+cumulus.local
+extreme.local ansible_os=exos
+fortigate.local ansible_os=fortios fortios_vdom="global"

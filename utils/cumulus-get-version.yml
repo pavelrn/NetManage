@@ -1,0 +1,20 @@
+---
+
+- hosts: all
+
+  gather_facts: no
+  
+  vars_prompt:
+    - name: "ansible_ssh_pass"
+      prompt: "password for cumulus user?"
+  
+  tasks:
+  
+  - nclu:
+      commands:
+        - show version
+    register: version_info
+    
+  - name: Show version info
+    debug:
+      var: version_info

@@ -1,0 +1,36 @@
+---
+
+- hosts: all
+
+  gather_facts: no
+  
+  vars:
+    - ansible_ssh_user: cumulus
+  
+  vars_prompt:
+    - name: "ansible_ssh_pass"
+      prompt: "password for cumulus user?"
+
+  tasks:
+    - set_fact:
+        username: "{{ me.username }}"
+        password: "{{ me.enc_pass }}"
+        comment: "{{ me.comment }}"
+        key_path: "/home/paul/.ssh/id_rsa.pub"
+        ansible_become_pass: "{{ ansible_ssh_pass }}" 
+      
+    - name: Add user
+      user:
+        name: "{{ username }}"
+        password: "{{ password }}"
+        comment: "{{ comment }}"
+        groups: "sudo,netshow,netedit"
+        shell: /bin/bash
+      become: yes        
+    
+    - name: Set authorized key in alternate location
+      authorized_key:
+        user: "{{ username }}" 
+        key: "{{ lookup('file', key_path) }}"
+        manage_dir: False
+      become: yes

@@ -1,0 +1,85 @@
+---
+
+  - name: install the latest version of net-snmp
+    yum:
+      name: net-snmp
+      state: latest
+    become: yes
+    tags: [ 'snmp' ]
+
+  - name: start snmpd service on centos (to create sample config)
+    systemd:
+      state: started
+      name: snmpd
+    become: yes
+    tags: [ 'snmp' ]
+
+  - name: stop snmpd service on centos
+    systemd:
+      state: stopped
+      name: snmpd
+    become: yes
+    tags: [ 'snmp' ]
+
+  - name: set snmp user
+    lineinfile:
+      path: /etc/snmp/snmpd.conf
+      regexp: '^rouser '
+      line: 'rouser {{ s.user }} '
+    with_items: "{{ snmp.v3 }}"
+    loop_control:
+      loop_var: s
+    become: yes
+    tags: [ 'snmp' ]
+    
+  - name: set snmp user creds
+    lineinfile:
+      path: /var/lib/net-snmp/snmpd.conf
+      regexp: '^createUser '
+      line: 'createUser {{ s.user }} SHA "{{ s.auth }}" AES "{{ s.enc }}"'
+    with_items: "{{ snmp.v3 }}"
+    loop_control:
+      loop_var: s
+    become: yes
+    tags: [ 'snmp' ]
+
+  - name: clean SNMPv1,v2
+    replace:
+      path: /etc/snmp/snmpd.conf
+      regexp: '^rocommunity.*'
+    become: yes
+    when: clean is defined
+    tags: [ 'snmp' ]
+
+  - name: set snmp common params
+    lineinfile:
+      path: /etc/snmp/snmpd.conf
+      regexp: '^syslocation '
+      line: 'syslocation {{ snmp.location }} '
+    become: yes
+    tags: [ 'snmp' ]
+    
+  - name: set snmp common params
+    lineinfile:
+      path: /etc/snmp/snmpd.conf
+      regexp: '^syscontact '
+      line: 'syscontact {{ snmp.contact }} '
+    become: yes
+    tags: [ 'snmp' ]
+    
+  - name: set snmp daemon params
+    lineinfile:
+      path: /etc/sysconfig/snmpd
+      regexp: '^OPTIONS='
+      line: 'OPTIONS="-LS0-5d -Lf /dev/null -p /var/run/snmpd.pid"'
+    become: yes
+    tags: [ 'snmp' ]
+    
+  - name: start snmpd service on centos
+    systemd:
+      state: started
+      name: snmpd
+      enabled: yes
+    become: yes
+    tags: [ 'snmp' ]
+
