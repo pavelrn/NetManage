@@ -10,16 +10,16 @@
     delegate_to: localhost
     tags: [ 'syslog' ]
     
-  #- name: Clean syslog targets
-    #delegate_to: localhost
-    #command: perl {{inventory_dir }}/EXOS-API/execCli.pl \
-      #{{ inventory_hostname }} {{ ansible_ssh_user }} {{ ansible_ssh_pass }} \
-      #"conf syslog delete all"
-    #when: "'clean' is defined"
-    #tags: [ 'syslog' ]    
+  - name: Clean syslog targets
+    delegate_to: localhost
+    command: perl {{inventory_dir }}/EXOS-API/execCli.pl \
+      {{ inventory_hostname }} {{ ansible_ssh_user }} {{ ansible_ssh_pass }} \
+      "conf syslog delete all"
+    when: "'clean' is defined"
+    tags: [ 'syslog' ]    
   
-  #- name: Install EXOS configuration
-    #delegate_to: localhost
-    #command: perl {{inventory_dir }}/EXOS-API/execCliFile.pl \
-      #{{ inventory_hostname }} {{ ansible_ssh_user }} {{ ansible_ssh_pass }} {{ config_file }}
-    #tags: [ 'syslog' ]
+  - name: Install EXOS configuration
+    delegate_to: localhost
+    command: perl {{inventory_dir }}/EXOS-API/execCliFile.pl \
+      {{ inventory_hostname }} {{ ansible_ssh_user }} {{ ansible_ssh_pass }} {{ config_file }}
+    tags: [ 'syslog' ]
