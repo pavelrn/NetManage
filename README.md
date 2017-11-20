@@ -2,7 +2,7 @@
 
 This is a tool to configure network management protocols (SNMP, Syslog, SSH, NTP) on network devices and servers. This tool can be used as a super-quick way to setup many network-attached devices for monitoring via NMS/PAM.
 
-## Before you begin - Inventory
+### Before you begin: inventory
 
 Please fill in Ansible inventory file before you begin. The inventory file should contain the devices to be managed. 
 
@@ -16,7 +16,7 @@ extreme.local ansible_os=exos
 fortigate.local ansible_os=fortios fortios_vdom="global"
 ```
 
-### Before you begin - Model
+### Before you begin: model
 
 Please fill in management protocols params inside group_vars/managed_devices file. This data will be used to configure management protocols on network devices.
 
@@ -48,7 +48,7 @@ ssh:
 
 ```
 
-## Deployment user
+### Before you begin: deployment user
 
 
 To run Ansible playbooks you need a user (deployment user) to connect to network devices. You can use simple Ansible playbooks inside /utils directory to set up the deployment  user.
@@ -70,9 +70,9 @@ non-zero return code
 ```
 
 
-## Running
+### ...and action!
 
-The following playbook will configure a set of management protocols. Please note that not every <device type,protocol> pars are implemented in playbook. 
+The following playbook will configure a set of management protocols. Please note that not every <device type,protocol> pairs are implemented in playbook. Please see getters/* for details. 
 
 ```
 ansible-playbook -i inventory.sample deploy-management.yml --tags="snmp,syslog,ntp,ssh"
