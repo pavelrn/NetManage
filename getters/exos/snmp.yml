@@ -3,17 +3,20 @@
   # modeling
   - set_fact:
       model_file: "models/snmp.exos.j2"
-      config_file: "{{ config_dir }}/{{ inventory_hostname }}-snmp.exos.conf"
+      config_file: "{{ config_dir }}/{{ inventory_hostname }}-snmp.exos.conf"      
     tags: [ 'snmp' ]
       
   - template: src={{ model_file }} dest={{ config_file }}
     delegate_to: localhost
+    register: templating_output
     tags: [ 'snmp' ]
+    
+  
     
   - name: Clean SNMPv3 users
     delegate_to: localhost
-    command: perl {{inventory_dir }}/EXOS-API/execCli.pl \
-      {{ inventory_hostname }} {{ ansible_ssh_user }} {{ ansible_ssh_pass }} {{ cmd }}
+    command: perl {{ exos_api_dir }}/execCli.pl \
+      {{ inventory_hostname }} {{ ansible_ssh_user }} {{ ansible_ssh_pass }} "{{ cmd }}"
     when: "'clean' is defined"
     with_items:
       - "conf snmpv3 delete user all-non-defaults"
@@ -26,6 +29,6 @@
     
   - name: Install EXOS configuration
     delegate_to: localhost
-    command: perl {{inventory_dir }}/EXOS-API/execCliFile.pl \
+    command: perl {{ exos_api_dir }}/execCliFile.pl \
       {{ inventory_hostname }} {{ ansible_ssh_user }} {{ ansible_ssh_pass }} {{ config_file }}
     tags: [ 'snmp' ]

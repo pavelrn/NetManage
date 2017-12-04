@@ -1,10 +1,6 @@
 #configure snmp sysLocation "{{ snmp.location }}"
 
-
-# PLEASE COMMENT THIS OUT IF NECCESSARY
-conf snmpv3 delete user all-non-defaults
-configure snmpv3 delete target-addr all
-configure snmpv3 delete target-params
+enable snmpv3 default-group
 
 configure snmp sysContact "{{ snmp.contact }}"
 

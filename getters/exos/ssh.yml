@@ -12,6 +12,6 @@
 
   - name: Install EXOS configuration
     delegate_to: localhost
-    command: perl {{inventory_dir }}/EXOS-API/execCliFile.pl \
+    command: perl {{ exos_api_dir }}/execCliFile.pl \
       {{ inventory_hostname }} {{ ansible_ssh_user }} {{ ansible_ssh_pass }} {{ config_file }}
     tags: [ 'ssh' ]

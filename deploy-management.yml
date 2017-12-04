@@ -9,6 +9,16 @@
     config_dir: configs
     ansible_os_family: undefined
     commit_changes: "{{ commit|default(false) }}" 
+    exos_api_dir: "{{ playbook_dir }}/getters/exos/EXOS-API"
+    ansible_log_path: >
+      "{{ lookup('ini', 'log_path section=defaults file=ansible.cfg') }}"
+    ansible_log_path_latest: >
+      "{{ lookup('ini', 'log_path section=defaults file=ansible.cfg') |
+      dirname }}/latest.log"
+    ansible_log_path_with_time: >
+      "{{ lookup('ini', 'log_path section=defaults file=ansible.cfg') |
+      dirname }}/{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}.log"
+      
   tasks:
 
   - name: Create configuration directory
@@ -20,12 +30,17 @@
 
   - name: Gather facts (Linux-enabled systems)
     setup:
-    # fo not gather facts if ansible_os is defined
+    # not gather facts if ansible_os is defined
     when: 'ansible_os is undefined'
     tags: [ 'always' ]
     
   - debug: 
       msg: "Device type auto-detected as: {{ ansible_os_family }}"
+    tags: [ 'always' ]
+
+  - debug: 
+      msg: "{{ lookup('ini', 'log_path section=defaults file=ansible.cfg') }}" 
+    tags: [ 'always' ]    
 
   - set_fact:
       ansible_os: cumulus
@@ -44,4 +59,14 @@
     loop_control:
       loop_var: i
 
- 
+  - name: Copy log file to file with a timestamp
+    connection: local
+    command: mv {{ ansible_log_path }} {{ ansible_log_path_with_time }}
+    run_once: true
+    tags: [ 'always' ]
+    
+  - name: Making copy to latest
+    connection: local
+    command: cp {{ ansible_log_path_with_time}} {{ ansible_log_path_latest }}
+    run_once: true
+    tags: [ 'always' ]
