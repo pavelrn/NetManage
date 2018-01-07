@@ -83,7 +83,69 @@ You can use the playbook with clean=1 parameter to run kind of old-config cleani
 ```
 ansible-playbook -i inventory.sample deploy-management.yml --tags="snmp,syslog,ntp,ssh" -e "clean=1"
 ```
+### Logging
 
+Ansible logging to file is enabled by default. You will be able to see latest playbook run in ./logging/latest.log file. The ./logging directory also has all previous playbook runs named after timestamp when the playbook was run.
+
+Please note: running 2 or more playbooks at the same time very likely will lead to corrupted log file.  
+
+
+### Unit testing
+
+You can run unit tests of a templating procedure
+
+```
+ansible-playbook -i tests/dummy_inventory run-tests.yml
+```
+
+The playbook will take sample inputs (inventory group_vars files) from tests/group_vars/* and calls templating procedure. Each sample input has an expected result ('ok', or 'fail:<fail scope>'). As the result of the test you will see if sample outputs met expectations.
+
+If tests went successfully:
+
+```
+TASK [Checking templating results [ OK (unexpected) ]] *************************
+
+TASK [Checking templating results [ FAILED (unexpected) ]] *********************
+
+TASK [Results] *****************************************************************
+ok: [cumulus] => {
+    "msg": [
+        ">>>", 
+        ">>> Please check the outputs above for errors if there are any:", 
+        ">>>  * OK (unexpected) => templating must have failed, but is OK", 
+        ">>>  * FAILED (unexpected) => templating must be OK, but failed", 
+        ">>>   ", 
+        ""
+    ]
+}
+
+```  
+
+If some tests didn't meet expected result:
+
+```
+TASK [Checking templating results [ OK (unexpected) ]] **********************************************
+
+TASK [Checking templating results [ FAILED (unexpected) ]] ******************************************
+failed: [cumulus] (item={'failed': True, 'model_file': u'syslog.cumulus.j2', 'test_file': u'test2.ok'}) => {
+    "changed": false, 
+    "failed_when_result": true, 
+    "msg": [
+        ">>>", 
+        ">>> FAILED (unexpected)", 
+        ">>>", 
+        ""
+    ], 
+    "tr": {
+        "failed": true, 
+        "model_file": "syslog.cumulus.j2", 
+        "test_file": "test2.ok"
+    }
+}
+
+```
+
+You can write your own tests and place them in tests/group_vars/ directory. New tests will be used on next run.
 
 ### TO DO
 

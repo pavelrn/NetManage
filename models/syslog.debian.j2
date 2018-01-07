@@ -1,0 +1,7 @@
+{% for s in syslog_servers %}
+{% if 'tcp' in log|default('udp') %}
+*.*	@@{{ s }}:1470
+{% else %}
+*.*	@{{ s }}:514
+{% endif %}
+{% endfor %}

@@ -1,0 +1,81 @@
+---
+  
+- hosts: all
+
+  # we control facts gathering
+  gather_facts: no
+  
+  connection: local
+  
+  vars:
+    config_dir: tests/configs
+
+
+  tasks:
+  
+  - set_fact:
+      templating_result_arr: [ ]
+
+   # Loop over different group_vars inputs.
+   # Load facts from test_inv/group_vars/test* and call templating
+
+  - include: run-one-test.yml
+    vars:
+      - test_file: "{{ i }}"
+    with_fileglob: [ "tests/group_vars/test*" ]
+    loop_control:
+      loop_var: i
+     
+
+  - name: Checking templating results [ OK (unexpected) ]
+    vars:
+      msg: |
+       >>>
+       >>> OK (unexpected)
+       >>>
+    debug: 
+      msg: "{{ msg.split('\n') }}"
+    failed_when: (tr.failed == False) and ('fail' in tr.test_file) and 
+      (tr.model_file.split('.')[0] in (tr.test_file.split(':')[1] if ':' in tr.test_file else '')) 
+    #
+    # The condition above is used to check 'fail scope'.
+    # If templating is OK, but should fail we alert
+    # Ex.:
+    #      tr.model_file = 'syslog.cumulus.j2'
+    #      model_file.split[0] = 'syslog'
+    #      tr.test_file = test1.fail:syslog
+    #      tr.test_file.split(':')[1] = 'syslog'
+    #
+    ignore_errors: yes
+    when: (tr.failed == False) and ('fail' in tr.test_file) and 
+      (tr.model_file.split('.')[0] in (tr.test_file.split(':')[1] if ':' in tr.test_file else ''))
+    with_items: [ "{{ templating_result_arr }}" ]
+    loop_control:
+     loop_var: tr
+     
+  - name: Checking templating results [ FAILED (unexpected) ]
+    vars:
+      msg: |
+       >>>
+       >>> FAILED (unexpected)
+       >>>
+    debug: 
+      msg: "{{ msg.split('\n') }}"
+    failed_when: (tr.failed == True) and ('ok' in tr.test_file)
+    ignore_errors: yes
+    when: (tr.failed == True) and ('ok' in tr.test_file)
+    with_items: [ "{{ templating_result_arr }}" ]
+    loop_control:
+     loop_var: tr
+     
+  - name: Results
+    vars:
+      msg: |
+       >>>
+       >>> Please check the outputs above for errors if there are any:
+       >>>  * OK (unexpected) => templating must have failed, but is OK
+       >>>  * FAILED (unexpected) => templating must be OK, but failed
+       >>>   
+    debug: 
+      msg: "{{ msg.split('\n') }}"
+    run_once: yes

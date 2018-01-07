@@ -1,0 +1,6 @@
+[test_devices]
+cumulus ansible_os=cumulus
+extreme ansible_os=exos
+fortigate ansible_os=fortios
+debian ansible_os=debian
+centos ansible_os=centos

@@ -15,3 +15,4 @@
     command: perl {{ exos_api_dir }}/execCliFile.pl \
       {{ inventory_hostname }} {{ ansible_ssh_user }} {{ ansible_ssh_pass }} {{ config_file }}
     tags: [ 'ssh' ]
+    when: "'commit' is defined"

@@ -11,13 +11,11 @@
     register: templating_output
     tags: [ 'snmp' ]
     
-  
-    
   - name: Clean SNMPv3 users
     delegate_to: localhost
     command: perl {{ exos_api_dir }}/execCli.pl \
       {{ inventory_hostname }} {{ ansible_ssh_user }} {{ ansible_ssh_pass }} "{{ cmd }}"
-    when: "'clean' is defined"
+    when: "replace is defined"
     with_items:
       - "conf snmpv3 delete user all-non-defaults"
       - "configure snmpv3 delete target-addr all"
@@ -25,10 +23,10 @@
     loop_control:
       loop_var: cmd
     tags: [ 'snmp' ]    
-  
     
   - name: Install EXOS configuration
     delegate_to: localhost
     command: perl {{ exos_api_dir }}/execCliFile.pl \
       {{ inventory_hostname }} {{ ansible_ssh_user }} {{ ansible_ssh_pass }} {{ config_file }}
     tags: [ 'snmp' ]
+    when: "commit is defined"

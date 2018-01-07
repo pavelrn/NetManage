@@ -1,0 +1,103 @@
+---
+
+  - name: install the latest version of snmp
+    apt:
+      name: snmpd
+      state: latest
+      update_cache: yes
+    become: yes
+    tags: [ 'snmp' ]
+
+  - name: start snmpd service (to create sample config)
+    service:
+      state: started
+      name: snmpd
+    become: yes
+    tags: [ 'snmp' ]
+
+  - name: stop snmpd service
+    service:
+      state: stopped
+      name: snmpd
+    become: yes
+    tags: [ 'snmp' ]
+
+  - name: listen address
+    lineinfile:
+      path: /etc/snmp/snmpd.conf
+      regexp: '^agentAddress '
+      line: 'agentAddress  udp:{{ ansible_eth0.ipv4.address }}:161'
+    become: yes
+    tags: [ 'snmp' ]
+
+
+  - name: set snmp user
+    lineinfile:
+      path: /etc/snmp/snmpd.conf
+      regexp: '^rouser '
+      line: 'rouser {{ s.user }} '
+    with_items: "{{ snmp.v3 }}"
+    loop_control:
+      loop_var: s
+    become: yes
+    tags: [ 'snmp' ]
+    
+  - name: set snmp user creds
+    lineinfile:
+      path: /var/lib/snmp/snmpd.conf
+      regexp: '^createUser '
+      line: 'createUser {{ s.user }} SHA "{{ s.auth }}" AES "{{ s.enc }}"'
+    with_items: "{{ snmp.v3 }}"
+    loop_control:
+      loop_var: s
+    become: yes
+    tags: [ 'snmp' ]
+
+  - name: clean SNMPv1,v2
+    replace:
+      path: /etc/snmp/snmpd.conf
+      regexp: '^rocommunity.*'
+    become: yes
+    when: clean is defined
+    tags: [ 'snmp' ]
+
+  - name: set snmp common params
+    lineinfile:
+      path: /etc/snmp/snmpd.conf
+      regexp: '^sysLocation '
+      line: 'sysLocation {{ snmp.location }} '
+    become: yes
+    tags: [ 'snmp' ]
+    
+  - name: set snmp common params
+    lineinfile:
+      path: /etc/snmp/snmpd.conf
+      regexp: '^sysContact '
+      line: 'sysContact {{ snmp.contact }} '
+    become: yes
+    tags: [ 'snmp' ]
+
+  - name: disable connection logging
+    lineinfile:
+      path: /etc/snmp/snmpd.conf
+      regexp: '^dontLogTCPWrappersConnects '
+      line: 'dontLogTCPWrappersConnects yes'
+    become: yes
+    tags: [ 'snmp' ]
+    
+  - name: set snmp daemon params
+    lineinfile:
+      path: /etc/default/snmpd
+      regexp: '^OPTIONS='
+      line: 'OPTIONS="-LS0-5d -Lf /dev/null -p /var/run/snmpd.pid"'
+    become: yes
+    tags: [ 'snmp' ]
+    
+  - name: start snmpd service on centos
+    service:
+      state: started
+      name: snmpd
+      enabled: yes
+    become: yes
+    tags: [ 'snmp' ]
+

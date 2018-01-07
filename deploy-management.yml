@@ -10,16 +10,20 @@
     ansible_os_family: undefined
     commit_changes: "{{ commit|default(false) }}" 
     exos_api_dir: "{{ playbook_dir }}/getters/exos/EXOS-API"
+    timestamp: "{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
     ansible_log_path: >
       "{{ lookup('ini', 'log_path section=defaults file=ansible.cfg') }}"
     ansible_log_path_latest: >
       "{{ lookup('ini', 'log_path section=defaults file=ansible.cfg') |
       dirname }}/latest.log"
-    ansible_log_path_with_time: >
-      "{{ lookup('ini', 'log_path section=defaults file=ansible.cfg') |
-      dirname }}/{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}.log"
       
   tasks:
+
+  - set_fact:
+      ansible_log_path_with_time: "{{ lookup('ini', 'log_path section=defaults file=ansible.cfg') |
+      dirname }}/{{ timestamp }}.log"
+    run_once: true
+    tags: [ 'always' ]
 
   - name: Create configuration directory
     local_action: file path={{ config_dir }} state=directory
@@ -37,11 +41,7 @@
   - debug: 
       msg: "Device type auto-detected as: {{ ansible_os_family }}"
     tags: [ 'always' ]
-
-  - debug: 
-      msg: "{{ lookup('ini', 'log_path section=defaults file=ansible.cfg') }}" 
-    tags: [ 'always' ]    
-
+    
   - set_fact:
       ansible_os: cumulus
     when:  "'Cumulus' in ansible_os_family"
@@ -50,6 +50,11 @@
   - set_fact:
       ansible_os: redhat
     when:  "'RedHat' in ansible_os_family"
+    tags: [ 'always' ]
+
+  - set_fact:
+      ansible_os: debian
+    when:  "'Debian' in ansible_os_family"
     tags: [ 'always' ]
 
   - include: "{{ i }}"
@@ -67,6 +72,6 @@
     
   - name: Making copy to latest
     connection: local
-    command: cp {{ ansible_log_path_with_time}} {{ ansible_log_path_latest }}
+    command: cp {{ ansible_log_path_with_time}} {{ ansible_log_path_latest  }}
     run_once: true
     tags: [ 'always' ]

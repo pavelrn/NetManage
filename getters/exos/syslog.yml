@@ -15,7 +15,7 @@
     command: perl {{ exos_api_dir }}/execCli.pl \
       {{ inventory_hostname }} {{ ansible_ssh_user }} {{ ansible_ssh_pass }} \
       "conf syslog delete all"
-    when: "'clean' is defined"
+    when: "replace is defined"
     tags: [ 'syslog' ]    
   
   - name: Install EXOS configuration
@@ -23,3 +23,4 @@
     command: perl {{ exos_api_dir }}/execCliFile.pl \
       {{ inventory_hostname }} {{ ansible_ssh_user }} {{ ansible_ssh_pass }} {{ config_file }}
     tags: [ 'syslog' ]
+    when: "commit is defined"

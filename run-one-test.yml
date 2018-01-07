@@ -1,0 +1,27 @@
+---
+
+# Looping over model files
+
+- name: Load data inside facts
+  include_vars: 
+    file: "{{ test_file }}" 
+    
+- name: "Templating {{ test_file }}"
+  delegate_to: localhost
+  template: src={{ model_file }} dest="{{ config_dir }}/{{ test_file | basename }}-{{ inventory_hostname }}-{{ model_file | basename }}.conf"
+  with_fileglob: [ "models/*{{ ansible_os }}.j2" ]
+  register: r
+  loop_control:
+    loop_var: model_file
+  ignore_errors: yes
+
+- set_fact:
+    templating_result_arr: "{{ templating_result_arr }} + 
+       [{ 
+          'model_file' : '{{ item.model_file | basename }}', 
+          'test_file' : '{{ test_file |  basename }}',
+          'failed' : {{ item.failed }} 
+       }]"
+  with_items: "[ {{ r.results }} ]"
+  no_log: true
+

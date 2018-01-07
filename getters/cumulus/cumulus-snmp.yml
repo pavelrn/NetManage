@@ -10,13 +10,15 @@
     delegate_to: localhost
     tags: [ 'snmp' ]
       
-  - nclu:
+  - name: Cleaning old SNMP configuration via NCLU
+    nclu:
       commands:
         - del snmp-server all
     when: clean is defined
     tags: [ 'snmp' ]
   
-  - nclu:
+  - name: Pushing new SNMP config via NCLU
+    nclu:
       template: "{{ item }}"
       commit: "{{ commit_changes }}"
     with_file:
