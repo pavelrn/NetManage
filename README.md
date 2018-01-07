@@ -85,20 +85,20 @@ ansible-playbook -i inventory.sample deploy-management.yml --tags="snmp,syslog,n
 ```
 ### Logging
 
-Ansible logging to file is enabled by default. You will be able to see latest playbook run in ./logging/latest.log file. The ./logging directory also has all previous playbook runs named after timestamp when the playbook was run.
+Ansible logging to file is enabled by default. You will be able to see latest playbook run in `./logging/latest.log` file. The `./logging` directory also has all previous playbook runs named after timestamp when the playbook was run.
 
 Please note: running 2 or more playbooks at the same time very likely will lead to corrupted log file.  
 
 
 ### Unit testing
 
-You can run unit tests of a templating procedure
+You can run unit tests of a templating procedure:
 
 ```
 ansible-playbook -i tests/dummy_inventory run-tests.yml
 ```
 
-The playbook will take sample inputs (inventory group_vars files) from tests/group_vars/* and calls templating procedure. Each sample input has an expected result ('ok', or 'fail:<fail scope>'). As the result of the test you will see if sample outputs met expectations.
+The `run-tests.yml` playbook will take sample inputs (inventory group_vars files) from `tests/group_vars/*` and call templating procedure. Each sample input has an expected templating result ('ok', or 'fail:<fail scope>'). As the result of the test you will see if sample outputs meet expectations.
 
 If tests went successfully:
 
@@ -145,7 +145,7 @@ failed: [cumulus] (item={'failed': True, 'model_file': u'syslog.cumulus.j2', 'te
 
 ```
 
-You can write your own tests and place them in tests/group_vars/ directory. New tests will be used on next run.
+You can write your own tests and place them in `tests/group_vars/` directory. New tests will be used on next run of `run-tests.yml` playbook.
 
 ### TO DO
 
